@@ -1,0 +1,92 @@
+import random
+
+locations = ['A', 'B', 'C', 'D', 'E']
+
+distance = {
+    'A': {'A': 0, 'B': 10, 'C': 15, 'D': 20, 'E': 25},
+    'B': {'A': 10, 'B': 0, 'C': 35, 'D': 25, 'E': 20},
+    'C': {'A': 15, 'B': 35, 'C': 0, 'D': 30, 'E': 10},
+    'D': {'A': 20, 'B': 25, 'C': 30, 'D': 0, 'E': 15},
+    'E': {'A': 25, 'B': 20, 'C': 10, 'D': 15, 'E': 0}
+}
+
+
+def route_distance(route):
+    total = 0
+
+    for i in range(len(route) - 1):
+        total += distance[route[i]][route[i + 1]]
+
+    total += distance[route[-1]][route[0]]
+
+    return total
+
+
+
+def create_population(size):
+    population = []
+
+    for _ in range(size):
+        route = locations.copy()
+        random.shuffle(route)
+        population.append(route)
+
+    return population
+
+
+
+def selection(population):
+    population.sort(key=route_distance)
+    return population[:2]
+
+
+
+def crossover(parent1, parent2):
+    start = random.randint(0, len(parent1) - 2)
+    end = random.randint(start + 1, len(parent1) - 1)
+
+    child = [None] * len(parent1)
+    child[start:end] = parent1[start:end]
+
+    remaining = [city for city in parent2 if city not in child]
+
+    j = 0
+    for i in range(len(child)):
+        if child[i] is None:
+            child[i] = remaining[j]
+            j += 1
+
+    return child
+
+
+
+def mutation(route):
+    i, j = random.sample(range(len(route)), 2)
+    route[i], route[j] = route[j], route[i]
+    return route
+
+
+population = create_population(20)
+
+for generation in range(100):
+
+    parents = selection(population)
+
+    new_population = parents.copy()
+
+    while len(new_population) < 20:
+        child = crossover(parents[0], parents[1])
+
+        if random.random() < 0.1:
+            child = mutation(child)
+
+        new_population.append(child)
+
+    population = new_population
+
+
+
+best_route = min(population, key=route_distance)
+
+print("Best Route:", " -> ".join(best_route) + " -> " + best_route[0])
+print("Minimum Distance:", route_distance(best_route))
