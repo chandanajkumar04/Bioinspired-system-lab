@@ -1,0 +1,169 @@
+import random
+
+# 1. Define the Agricultural Goal (Objective Function)
+# We want to find the combination that gives the lowest error (0.0 is perfect)
+def evaluate_crop_health(params):
+    water, nitrogen = params[0], params[1]
+    
+    # Target ideal conditions for the crop
+    ideal_water = 45.0      # Liters per m²
+    ideal_nitrogen = 12.0   # Grams per m²
+    
+    # Calculate the error (distance from ideal targets)
+    error = (water - ideal_water)**2 + (nitrogen - ideal_nitrogen)**2
+    return error
+
+# 2. PSO Algorithm Function
+def run_agricultural_pso(num_particles=20, iterations=50):
+    # Search boundaries: [Min, Max] for [Water, Nitrogen]
+    bounds = [[0.0, 100.0], [0.0, 50.0]]
+    
+    # PSO Hyperparameters
+    w = 0.5   # Inertia (controls momentum)
+    c1 = 1.5  # Cognitive (draws to personal best)
+    c2 = 1.5  # Social (draws to group best)
+    
+    # Initialize particles randomly within limits
+    positions = []
+    velocities = []
+    for _ in range(num_particles):
+        p_water = random.uniform(bounds[0][0], bounds[0][1])
+        p_nitro = random.uniform(bounds[1][0], bounds[1][1])
+        positions.append([p_water, p_nitro])
+        velocities.append([0.0, 0.0])
+    
+    # Initialize tracking variables
+    p_best_positions = [list(p) for p in positions]
+    p_best_scores = [evaluate_crop_health(p) for p in positions]
+    
+    g_best_idx = p_best_scores.index(min(p_best_scores))
+    g_best_position = list(p_best_positions[g_best_idx])
+    g_best_score = p_best_scores[g_best_idx]
+    
+    # Optimization Loop
+    for _ in range(iterations):
+        for i in range(num_particles):
+            for d in range(2): # Loop through 2 dimensions: 0 for Water, 1 for Nitrogen
+                r1 = random.random()
+                r2 = random.random()
+                
+                # Calculate new movement speed (Velocity Formula)
+                velocities[i][d] = (w * velocities[i][d] + 
+                                    c1 * r1 * (p_best_positions[i][d] - positions[i][d]) + 
+                                    c2 * r2 * (g_best_position[d] - positions[i][d]))
+                
+                # Move particle to new test values
+                positions[i][d] += velocities[i][d]
+                
+                # Keep particles strictly within realistic farming limits (Clamping)
+                if positions[i][d] < bounds[d][0]:
+                    positions[i][d] = bounds[d][0]
+                elif positions[i][d] > bounds[d][1]:
+                    positions[i][d] = bounds[d][1]
+            
+            # Evaluate new crop health score
+            score = evaluate_crop_health(positions[i])
+            
+            # Update Personal Best
+            if score < p_best_scores[i]:
+                p_best_scores[i] = score
+                p_best_positions[i] = list(positions[i])
+                
+                # Update Global Best
+                if score < g_best_score:
+                    g_best_score = score
+                    g_best_position = list(positions[i])
+                    
+    return g_best_position
+
+# 3. Execute the System
+if __name__ == "__main__":
+    best_settings = run_agricultural_pso()
+    
+    print("--- Optimized Agricultural Monitoring Results ---")
+    print(f"Optimal Water Irrigation: {best_settings[0]:.2f} L/m²")
+    print(f"Optimal Nitrogen Target:  {best_settings[1]:.2f} g/m²")import random
+
+# 1. Define the Agricultural Goal (Objective Function)
+# We want to find the combination that gives the lowest error (0.0 is perfect)
+def evaluate_crop_health(params):
+    water, nitrogen = params[0], params[1]
+    
+    # Target ideal conditions for the crop
+    ideal_water = 45.0      # Liters per m²
+    ideal_nitrogen = 12.0   # Grams per m²
+    
+    # Calculate the error (distance from ideal targets)
+    error = (water - ideal_water)**2 + (nitrogen - ideal_nitrogen)**2
+    return error
+
+# 2. PSO Algorithm Function
+def run_agricultural_pso(num_particles=20, iterations=50):
+    # Search boundaries: [Min, Max] for [Water, Nitrogen]
+    bounds = [[0.0, 100.0], [0.0, 50.0]]
+    
+    # PSO Hyperparameters
+    w = 0.5   # Inertia (controls momentum)
+    c1 = 1.5  # Cognitive (draws to personal best)
+    c2 = 1.5  # Social (draws to group best)
+    
+    # Initialize particles randomly within limits
+    positions = []
+    velocities = []
+    for _ in range(num_particles):
+        p_water = random.uniform(bounds[0][0], bounds[0][1])
+        p_nitro = random.uniform(bounds[1][0], bounds[1][1])
+        positions.append([p_water, p_nitro])
+        velocities.append([0.0, 0.0])
+    
+    # Initialize tracking variables
+    p_best_positions = [list(p) for p in positions]
+    p_best_scores = [evaluate_crop_health(p) for p in positions]
+    
+    g_best_idx = p_best_scores.index(min(p_best_scores))
+    g_best_position = list(p_best_positions[g_best_idx])
+    g_best_score = p_best_scores[g_best_idx]
+    
+    # Optimization Loop
+    for _ in range(iterations):
+        for i in range(num_particles):
+            for d in range(2): # Loop through 2 dimensions: 0 for Water, 1 for Nitrogen
+                r1 = random.random()
+                r2 = random.random()
+                
+                # Calculate new movement speed (Velocity Formula)
+                velocities[i][d] = (w * velocities[i][d] + 
+                                    c1 * r1 * (p_best_positions[i][d] - positions[i][d]) + 
+                                    c2 * r2 * (g_best_position[d] - positions[i][d]))
+                
+                # Move particle to new test values
+                positions[i][d] += velocities[i][d]
+                
+                # Keep particles strictly within realistic farming limits (Clamping)
+                if positions[i][d] < bounds[d][0]:
+                    positions[i][d] = bounds[d][0]
+                elif positions[i][d] > bounds[d][1]:
+                    positions[i][d] = bounds[d][1]
+            
+            # Evaluate new crop health score
+            score = evaluate_crop_health(positions[i])
+            
+            # Update Personal Best
+            if score < p_best_scores[i]:
+                p_best_scores[i] = score
+                p_best_positions[i] = list(positions[i])
+                
+                # Update Global Best
+                if score < g_best_score:
+                    g_best_score = score
+                    g_best_position = list(positions[i])
+                    
+    return g_best_position
+
+# 3. Execute the System
+if __name__ == "__main__":
+    best_settings = run_agricultural_pso()
+    
+    print("--- Optimized Agricultural Monitoring Results ---")
+    print(f"Optimal Water Irrigation: {best_settings[0]:.2f} L/m²")
+    print(f"Optimal Nitrogen Target:  {best_settings[1]:.2f} g/m²")
